@@ -13,8 +13,11 @@ class Paper {
   currentPaperX = 0;
   currentPaperY = 0;
   rotating = false;
+  startX = 0;
+  startY = 0;
+  startTime = 0;
   
-  init(paper) {
+  init(paper, index) {
     // Hàm xử lý di chuyển chung cho cả mouse và touch
     const handleMove = (clientX, clientY) => {
       if(!this.rotating) {
@@ -71,7 +74,7 @@ class Paper {
       this.rotating = false;
     });
     
-    // Touch events cho mobile
+    // Touch events cho mobile - xử lý trong main loop
     document.addEventListener('touchmove', (e) => {
       if(this.holdingPaper) {
         e.preventDefault();
@@ -82,19 +85,55 @@ class Paper {
     
     paper.addEventListener('touchstart', (e) => {
       if(this.holdingPaper) return;
-      this.holdingPaper = true;
-      paper.style.zIndex = highestZ;
-      highestZ += 1;
+      
       const touch = e.touches[0];
-      this.mouseTouchX = touch.clientX;
-      this.mouseTouchY = touch.clientY;
-      this.mouseX = touch.clientX;
-      this.mouseY = touch.clientY;
-      this.prevMouseX = touch.clientX;
-      this.prevMouseY = touch.clientY;
+      this.startX = touch.clientX;
+      this.startY = touch.clientY;
+      this.startTime = Date.now();
+      
+      // Đợi một chút để xem user có ý định drag không
+      this.touchTimeout = setTimeout(() => {
+        this.holdingPaper = true;
+        paper.style.zIndex = highestZ;
+        highestZ += 1;
+        this.mouseTouchX = touch.clientX;
+        this.mouseTouchY = touch.clientY;
+        this.mouseX = touch.clientX;
+        this.mouseY = touch.clientY;
+        this.prevMouseX = touch.clientX;
+        this.prevMouseY = touch.clientY;
+        
+        // Hiệu ứng haptic feedback nếu có
+        if (navigator.vibrate) {
+          navigator.vibrate(10);
+        }
+      }, 150); // Delay 150ms để phân biệt tap vs drag
+    });
+    
+    paper.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0];
+      const moveX = Math.abs(touch.clientX - this.startX);
+      const moveY = Math.abs(touch.clientY - this.startY);
+      
+      // Nếu di chuyển > 10px thì coi như drag ngay
+      if (moveX > 10 || moveY > 10) {
+        clearTimeout(this.touchTimeout);
+        if (!this.holdingPaper) {
+          this.holdingPaper = true;
+          paper.style.zIndex = highestZ;
+          highestZ += 1;
+          this.mouseTouchX = this.startX;
+          this.mouseTouchY = this.startY;
+          this.mouseX = this.startX;
+          this.mouseY = this.startY;
+          this.prevMouseX = this.startX;
+          this.prevMouseY = this.startY;
+        }
+      }
     });
     
     window.addEventListener('touchend', () => {
+      clearTimeout(this.touchTimeout);
       this.holdingPaper = false;
       this.rotating = false;
     });
@@ -154,37 +193,52 @@ function handlePaperReveal(paper, index) {
 // Thêm event listener cho tap/click reveal
 papers.forEach((paper, index) => {
   const p = new Paper();
-  p.init(paper);
+  p.init(paper, index);
   paperInstances.push(p);
   
   // Thêm z-index ban đầu theo thứ tự ngược (paper đầu tiên ở trên cùng)
   paper.style.zIndex = papers.length - index;
   
   // Tap để reveal (chỉ trên mobile)
+  let tapStartX = 0;
+  let tapStartY = 0;
   let tapStartTime = 0;
   let hasMoved = false;
   
   paper.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    tapStartX = touch.clientX;
+    tapStartY = touch.clientY;
     tapStartTime = Date.now();
     hasMoved = false;
   });
   
   paper.addEventListener('touchmove', (e) => {
-    hasMoved = true;
+    const touch = e.touches[0];
+    const moveX = Math.abs(touch.clientX - tapStartX);
+    const moveY = Math.abs(touch.clientY - tapStartY);
+    
+    // Nếu di chuyển > 10px thì coi như đã move
+    if (moveX > 10 || moveY > 10) {
+      hasMoved = true;
+    }
   });
   
   paper.addEventListener('touchend', (e) => {
     const tapDuration = Date.now() - tapStartTime;
-    // Nếu tap nhanh (< 200ms) và không di chuyển nhiều thì reveal
-    if (isMobile() && !hasMoved && tapDuration < 200 && !revealedPapers.has(index)) {
+    // Nếu tap nhanh (< 300ms) và không di chuyển thì reveal
+    if (isMobile() && !hasMoved && tapDuration < 300 && !revealedPapers.has(index)) {
       handlePaperReveal(paper, index);
     }
   });
   
-  // Click cho desktop testing
+  // Double tap để reveal trên desktop (cho testing)
+  let lastTap = 0;
   paper.addEventListener('click', (e) => {
-    if (isMobile() && !revealedPapers.has(index)) {
+    const now = Date.now();
+    if (isMobile() && !revealedPapers.has(index) && now - lastTap < 300) {
       handlePaperReveal(paper, index);
     }
+    lastTap = now;
   });
 });
