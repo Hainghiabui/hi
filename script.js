@@ -196,8 +196,8 @@ papers.forEach((paper, index) => {
   p.init(paper, index);
   paperInstances.push(p);
   
-  // Thêm z-index ban đầu theo thứ tự ngược (paper đầu tiên ở trên cùng)
-  paper.style.zIndex = papers.length - index;
+  // Thêm z-index ban đầu (paper cuối cùng trong HTML ở trên cùng)
+  paper.style.zIndex = index + 1;
   
   // Tap để reveal (chỉ trên mobile)
   let tapStartX = 0;
