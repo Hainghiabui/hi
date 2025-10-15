@@ -104,55 +104,87 @@ const papers = Array.from(document.querySelectorAll('.paper'));
 
 // Lưu trữ Paper instances
 const paperInstances = [];
+const isMobile = () => window.innerWidth <= 430;
 
-// Hàm tự động spread papers trên mobile
-function spreadPapersOnMobile() {
-  const isMobile = window.innerWidth <= 430;
+// Biến lưu trạng thái paper đã được reveal
+const revealedPapers = new Set();
+
+// Hàm xử lý tap để reveal paper trên mobile
+function handlePaperReveal(paper, index) {
+  if (!isMobile()) return;
   
-  if (isMobile) {
-    // Tính toán vị trí cho mỗi paper trên mobile
-    papers.forEach((paper, index) => {
-      const totalPapers = papers.length;
-      
-      // Tạo pattern spread theo dạng spiral/fan
-      const angle = (index / totalPapers) * 180 - 90; // từ -90 đến 90 độ
-      const radius = 150; // khoảng cách từ center
-      
-      // Random thêm một chút để tự nhiên hơn
-      const randomX = (Math.random() - 0.5) * 100;
-      const randomY = index * 400 - 200; // Spread theo chiều dọc
-      
-      const x = Math.sin(angle * Math.PI / 180) * radius + randomX;
-      const y = randomY;
-      const rotation = Math.random() * 20 - 10;
-      
-      // Set vị trí ban đầu
-      setTimeout(() => {
-        paper.style.transform = `translateX(${x}px) translateY(${y}px) rotateZ(${rotation}deg)`;
-        paper.style.transition = 'transform 0.8s ease-out';
-        
-        // Cập nhật vị trí trong Paper instance
-        if (paperInstances[index]) {
-          paperInstances[index].currentPaperX = x;
-          paperInstances[index].currentPaperY = y;
-          paperInstances[index].rotation = rotation;
-        }
-        
-        // Tắt transition sau khi animation xong để drag mượt
-        setTimeout(() => {
-          paper.style.transition = 'transform 0.3s ease';
-        }, 800);
-      }, index * 100); // Delay để tạo hiệu ứng bay ra lần lượt
-    });
-  }
+  // Nếu đã reveal rồi thì không làm gì
+  if (revealedPapers.has(index)) return;
+  
+  // Tính toán vị trí bay ra cho paper này
+  const side = index % 2 === 0 ? -1 : 1; // Bay ra trái hoặc phải xen kẽ
+  const offsetX = side * (250 + Math.random() * 100); // 250-350px
+  const offsetY = (Math.random() - 0.5) * 200; // Random lên xuống một chút
+  const rotation = side * (20 + Math.random() * 15); // 20-35 độ
+  
+  // Lấy vị trí hiện tại
+  const currentX = paperInstances[index].currentPaperX || 0;
+  const currentY = paperInstances[index].currentPaperY || 0;
+  
+  // Tính vị trí mới
+  const newX = currentX + offsetX;
+  const newY = currentY + offsetY;
+  
+  // Animation bay ra
+  paper.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+  paper.style.transform = `translateX(${newX}px) translateY(${newY}px) rotateZ(${rotation}deg)`;
+  
+  // Cập nhật vị trí trong instance
+  paperInstances[index].currentPaperX = newX;
+  paperInstances[index].currentPaperY = newY;
+  paperInstances[index].rotation = rotation;
+  
+  // Đánh dấu đã reveal
+  revealedPapers.add(index);
+  
+  // Thêm class để styling
+  paper.classList.add('revealed');
+  
+  // Reset transition sau khi animation xong
+  setTimeout(() => {
+    paper.style.transition = 'transform 0.3s ease';
+  }, 600);
 }
 
-papers.forEach(paper => {
+// Thêm event listener cho tap/click reveal
+papers.forEach((paper, index) => {
   const p = new Paper();
   p.init(paper);
   paperInstances.push(p);
+  
+  // Thêm z-index ban đầu theo thứ tự ngược (paper đầu tiên ở trên cùng)
+  paper.style.zIndex = papers.length - index;
+  
+  // Tap để reveal (chỉ trên mobile)
+  let tapStartTime = 0;
+  let hasMoved = false;
+  
+  paper.addEventListener('touchstart', (e) => {
+    tapStartTime = Date.now();
+    hasMoved = false;
+  });
+  
+  paper.addEventListener('touchmove', (e) => {
+    hasMoved = true;
+  });
+  
+  paper.addEventListener('touchend', (e) => {
+    const tapDuration = Date.now() - tapStartTime;
+    // Nếu tap nhanh (< 200ms) và không di chuyển nhiều thì reveal
+    if (isMobile() && !hasMoved && tapDuration < 200 && !revealedPapers.has(index)) {
+      handlePaperReveal(paper, index);
+    }
+  });
+  
+  // Click cho desktop testing
+  paper.addEventListener('click', (e) => {
+    if (isMobile() && !revealedPapers.has(index)) {
+      handlePaperReveal(paper, index);
+    }
+  });
 });
-
-// Chạy spread animation khi load trang
-window.addEventListener('load', spreadPapersOnMobile);
-window.addEventListener('resize', spreadPapersOnMobile);

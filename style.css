@@ -9,6 +9,35 @@ body {
   background-image: url("https://www.psdgraphics.com/wp-content/uploads/2022/01/white-math-paper-texture.jpg");
   background-position: center center;
 }
+
+.mobile-hint {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 24px;
+  border-radius: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 10000;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+.mobile-hint p {
+  margin: 0;
+  font-size: 16px !important;
+  color: #333 !important;
+  font-family: 'Noto Sans', sans-serif !important;
+  opacity: 1 !important;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
 .paper {
   background-image: url("https://i0.wp.com/textures.world/wp-content/uploads/2018/10/2-Millimeter-Paper-Background-copy.jpg?ssl=1");
   background-size: 500px;
@@ -50,15 +79,11 @@ img {
   background-repeat: no-repeat;
   opacity: 0.6;
 }
-.paper.red {
-/*   filter: hue-rotate(90deg); */
-}
+
 .paper:nth-of-type(3n) {
   background-position: left top;
 }
-.paper:nth-of-type(3n) {
-/*   filter: hue-rotate(200deg); */
-}
+
 p {
   font-family: 'Caveat', 'Patrick Hand', 'Dancing Script', cursive;
   font-size: 50px;
@@ -85,6 +110,29 @@ p {
     background-size: 300px;
     max-width: 85%;
     margin: 10px auto;
+    cursor: pointer;
+  }
+  
+  .paper:not(.revealed) {
+    animation: pulse-hint 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-hint {
+    0%, 100% {
+      box-shadow: 1px 15px 20px 0px rgba(0,0,0,0.5);
+    }
+    50% {
+      box-shadow: 1px 15px 25px 5px rgba(100,150,255,0.4);
+    }
+  }
+  
+  .paper.revealed {
+    opacity: 0.85;
+    pointer-events: auto;
+  }
+  
+  .mobile-hint {
+    display: block;
   }
   
   .paper.image {
