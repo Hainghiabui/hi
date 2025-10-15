@@ -1,0 +1,157 @@
+/* Google Fonts hỗ trợ tiếng Việt */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Dancing+Script:wght@400;700&family=Pacifico&family=Caveat:wght@400;700&family=Patrick+Hand&display=swap');
+body {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: 1000px;
+  background-image: url("https://www.psdgraphics.com/wp-content/uploads/2022/01/white-math-paper-texture.jpg");
+  background-position: center center;
+}
+.paper {
+  background-image: url("https://i0.wp.com/textures.world/wp-content/uploads/2018/10/2-Millimeter-Paper-Background-copy.jpg?ssl=1");
+  background-size: 500px;
+  background-position: center center;
+  padding: 20px 100px;
+  transform: rotateZ(-5deg);
+  box-shadow: 1px 15px 20px 0px rgba(0,0,0,0.5);
+  position: absolute;
+}
+.paper.heart {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  padding: 0;
+  border-radius: 50%;
+}
+.paper.image {
+  padding: 10px;
+}
+.paper.image p {
+  font-size: 30px;
+}
+img {
+  max-height: 200px;
+  width: 100%;
+  user-select: none;
+}
+.paper.heart::after {
+  content: "";
+  background-image: url('https://cdn.pixabay.com/photo/2016/03/31/19/25/cartoon-1294994__340.png');
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-size: 150px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+}
+.paper.red {
+/*   filter: hue-rotate(90deg); */
+}
+.paper:nth-of-type(3n) {
+  background-position: left top;
+}
+.paper:nth-of-type(3n) {
+/*   filter: hue-rotate(200deg); */
+}
+p {
+  font-family: 'Caveat', 'Patrick Hand', 'Dancing Script', cursive;
+  font-size: 50px;
+  color: rgb(0,0,100);
+  opacity: 0.75;
+  user-select: none;
+  font-weight: 600;
+  
+}
+
+/* Responsive cho iPhone 13 và các màn hình mobile */
+@media screen and (max-width: 430px) {
+  body {
+    background-size: 500px;
+    overflow-x: hidden;
+    padding: 20px 0;
+  }
+  
+  .paper {
+    padding: 15px 30px;
+    background-size: 300px;
+    max-width: 85%;
+    margin: 10px auto;
+  }
+  
+  .paper.image {
+    padding: 8px;
+  }
+  
+  .paper.image p {
+    font-size: 20px;
+  }
+  
+  img {
+    max-height: 150px;
+  }
+  
+  .paper.heart {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .paper.heart::after {
+    background-size: 100px;
+  }
+  
+  p {
+    font-size: 28px;
+    line-height: 1.4;
+  }
+  
+  .p1 {
+    font-size: 28px;
+  }
+  
+  .p2 {
+    font-size: 26px;
+  }
+}
+
+/* Responsive cho iPhone 13 cụ thể (390px width) */
+@media screen and (max-width: 390px) {
+  .paper {
+    padding: 12px 25px;
+  }
+  
+  p {
+    font-size: 26px;
+  }
+  
+  .p1 {
+    font-size: 26px;
+  }
+  
+  .p2 {
+    font-size: 24px;
+  }
+}
+
+/* Responsive cho các màn hình rất nhỏ */
+@media screen and (max-width: 360px) {
+  .paper {
+    padding: 10px 20px;
+  }
+  
+  p {
+    font-size: 24px;
+  }
+  
+  .p1 {
+    font-size: 24px;
+  }
+  
+  .p2 {
+    font-size: 22px;
+  }
+}
