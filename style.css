@@ -17,6 +17,7 @@ body {
   transform: rotateZ(-5deg);
   box-shadow: 1px 15px 20px 0px rgba(0,0,0,0.5);
   position: absolute;
+  transition: transform 0.3s ease;
 }
 .paper.heart {
   position: relative;
@@ -73,7 +74,10 @@ p {
   body {
     background-size: 500px;
     overflow-x: hidden;
+    overflow-y: auto;
     padding: 20px 0;
+    height: auto;
+    min-height: 100vh;
   }
   
   .paper {
