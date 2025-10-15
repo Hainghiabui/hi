@@ -13,16 +13,18 @@ class Paper {
   currentPaperX = 0;
   currentPaperY = 0;
   rotating = false;
+  
   init(paper) {
-    document.addEventListener('mousemove', (e) => {
+    // Hàm xử lý di chuyển chung cho cả mouse và touch
+    const handleMove = (clientX, clientY) => {
       if(!this.rotating) {
-        this.mouseX = e.clientX;
-        this.mouseY = e.clientY;
+        this.mouseX = clientX;
+        this.mouseY = clientY;
         this.velX = this.mouseX - this.prevMouseX;
         this.velY = this.mouseY - this.prevMouseY;
       }
-      const dirX = e.clientX - this.mouseTouchX;
-      const dirY = e.clientY - this.mouseTouchY;
+      const dirX = clientX - this.mouseTouchX;
+      const dirY = clientY - this.mouseTouchY;
       const dirLength = Math.sqrt(dirX*dirX+dirY*dirY);
       const dirNormalizedX = dirX / dirLength;
       const dirNormalizedY = dirY / dirLength;
@@ -41,7 +43,13 @@ class Paper {
         this.prevMouseY = this.mouseY;
         paper.style.transform = `translateX(${this.currentPaperX}px) translateY(${this.currentPaperY}px) rotateZ(${this.rotation}deg)`;
       }
-    })
+    };
+    
+    // Mouse events
+    document.addEventListener('mousemove', (e) => {
+      handleMove(e.clientX, e.clientY);
+    });
+    
     paper.addEventListener('mousedown', (e) => {
       if(this.holdingPaper) return;
       this.holdingPaper = true;
@@ -57,7 +65,36 @@ class Paper {
         this.rotating = true;
       }
     });
+    
     window.addEventListener('mouseup', () => {
+      this.holdingPaper = false;
+      this.rotating = false;
+    });
+    
+    // Touch events cho mobile
+    document.addEventListener('touchmove', (e) => {
+      if(this.holdingPaper) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleMove(touch.clientX, touch.clientY);
+      }
+    }, { passive: false });
+    
+    paper.addEventListener('touchstart', (e) => {
+      if(this.holdingPaper) return;
+      this.holdingPaper = true;
+      paper.style.zIndex = highestZ;
+      highestZ += 1;
+      const touch = e.touches[0];
+      this.mouseTouchX = touch.clientX;
+      this.mouseTouchY = touch.clientY;
+      this.mouseX = touch.clientX;
+      this.mouseY = touch.clientY;
+      this.prevMouseX = touch.clientX;
+      this.prevMouseY = touch.clientY;
+    });
+    
+    window.addEventListener('touchend', () => {
       this.holdingPaper = false;
       this.rotating = false;
     });
